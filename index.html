@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Certificado - ED7 Pragas</title>
+    <title>Gerador de Certificados - ED7 Pragas</title>
     <!-- Tailwind CSS para estilização rápida e moderna -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome para os ícones dos botões -->
@@ -51,13 +51,13 @@
             </button>
         </div>
 
-        <!-- Área do Visualizador do PDF (Simulando o visualizador do Chrome/Edge da imagem) -->
-        <div class="border border-gray-300 rounded-lg overflow-hidden bg-[#323639] flex flex-col h-[700px]">
-            <!-- Barra de ferramentas do leitor de PDF -->
+        <!-- Área do Visualizador do PDF (Simula leitor nativo da imagem) -->
+        <div class="border border-gray-300 rounded-lg overflow-hidden bg-[#323639] flex flex-col h-[750px]">
+            <!-- Barra de ferramentas -->
             <div class="bg-[#2f3134] text-white px-4 py-3 flex items-center justify-between border-b border-gray-800 text-sm">
                 <div class="flex items-center gap-4">
                     <button class="hover:bg-gray-700 p-1 rounded"><i class="fa-solid fa-bars"></i></button>
-                    <span class="font-medium text-gray-300 text-xs truncate max-w-[120px]" id="pdf-title">certificado.pdf</span>
+                    <span class="font-medium text-gray-300 text-xs truncate max-w-[150px]" id="pdf-title">certificado.pdf</span>
                     <div class="bg-[#202124] px-2 py-1 rounded text-xs flex items-center gap-1">
                         <span id="page-num">1</span> / <span id="page-count">1</span>
                     </div>
@@ -69,12 +69,12 @@
                     <span class="h-4 w-px bg-gray-600"></span>
                     <button class="hover:bg-gray-700 p-1.5 rounded text-xs"><i class="fa-solid fa-rotate-right"></i></button>
                     <button class="hover:bg-gray-700 p-1.5 rounded text-xs"><i class="fa-solid fa-pen-nib"></i></button>
-                    <button class="hover:bg-gray-700 p-1.5 rounded text-xs"><i class="fa-solid fa-download"></i></button>
-                    <button class="hover:bg-gray-700 p-1.5 rounded text-xs"><i class="fa-solid fa-print"></i></button>
+                    <button class="hover:bg-gray-700 p-1.5 rounded text-xs" onclick="baixarPDF()"><i class="fa-solid fa-download"></i></button>
+                    <button class="hover:bg-gray-700 p-1.5 rounded text-xs" onclick="imprimirPDF()"><i class="fa-solid fa-print"></i></button>
                 </div>
             </div>
 
-            <!-- Corpo do Visualizador com Miniatura e Visualização Principal -->
+            <!-- Corpo do Visualizador com Miniatura e Painel Principal -->
             <div class="flex flex-1 overflow-hidden">
                 <!-- Miniatura Lateral -->
                 <div class="w-1/4 bg-[#202124] border-r border-gray-800 p-4 hidden sm:flex flex-col items-center overflow-y-auto">
@@ -96,14 +96,16 @@
     <script>
         const { jsPDF } = window.jspdf;
 
-        // Função para formatar data de YYYY-MM-DD para DD/MM/YYYY
+        // Imagem do logotipo fornecida codificada em Base64 para garantir a exibição nativa
+        const logoBase64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAABGAQMAAAD5uPrcAAAABlBMVEX///8AAABVwtN+AAAAAnRSTlMAAHaTzTgAAAEuSURBVDjLY2AYBcMAsC5gkFjA8v+AYfF/pAHl/6YFpP9N+p///8D///9fPjB0XpAnf8H3m/fXb6M769S9p7vUqE677F4P1uH6C76v316fM3zP0Ll97lB9Z6fOnOsnv87tU6E767L7C0gHWL988vvy9vXZ87tE5M5OnbN65u2Zd2f0p86c7XOLN7DOnfW9V3367JnL0+/X36k+df/pvnd33/u+un52p8zUuXvWb2A9f/Xo/Ofv+R2ZMXfX+tVzZq+dfOfI3uVzhv+v2v97xfp1U9fN3zdh9aThA2vWjZ06ZuqksdMHTRo0adCYGf8nzT7Yv+bAtvWThv8buGL+9InTR68dNHrS0IFDBvWvPzB+5/Cdw2oO9AAsLgYAl802G6uVp8YAAAAASUVORK5CYII=";
+
+        // Formatação de data do padrão ISO do input (YYYY-MM-DD) para padrão do Brasil (DD/MM/YYYY)
         function formatarData(dataStr) {
             if (!dataStr) return "";
             const partes = dataStr.split('-');
             return `${partes[2]}/${partes[1]}/${partes[0]}`;
         }
 
-        // Função principal de desenho do PDF
         function buildPDF() {
             const doc = new jsPDF({
                 orientation: "portrait",
@@ -115,7 +117,7 @@
             const dataVal = formatarData(document.getElementById('dataCertificado').value) || "15/07/2026";
 
             // 1. Cabeçalho Principal Vermelho
-            doc.setFillColor(217, 37, 37); // Vermelho
+            doc.setFillColor(217, 37, 37); 
             doc.rect(10, 10, 190, 8, "F");
             doc.setFont("helvetica", "bold");
             doc.setFontSize(10);
@@ -123,93 +125,93 @@
             doc.text("Imunização e Controle de Pragas Urbanas", 12, 15.5);
             doc.text("CERTIFICADO DE GARANTIA", 148, 15.5);
 
-            // 2. Logotipo e Dados da Empresa
-            // Desenho do Sapinho / Logotipo ED7 de forma representativa (Formas coloridas para manter o código puro sem arquivos externos)
-            doc.setFillColor(51, 160, 44); // Verde do sapinho
-            doc.ellipse(22, 30, 8, 6, "F");
-            doc.setFillColor(255, 255, 255);
-            doc.ellipse(19, 26, 2.5, 2.5, "F");
-            doc.ellipse(25, 26, 2.5, 2.5, "F");
-            doc.setFillColor(0, 0, 0);
-            doc.ellipse(19, 26, 1, 1, "F");
-            doc.ellipse(25, 26, 1, 1, "F");
-            // Texto do Logo "ED7 PRAGAS"
-            doc.setFontSize(22);
-            doc.setFont("helvetica", "bold");
-            doc.setTextColor(217, 37, 37);
-            doc.text("ED7", 32, 31);
-            doc.setFontSize(10);
-            doc.setTextColor(0, 0, 0);
-            doc.text("PRAGAS", 32, 35);
+            // 2. Logotipo e Informações Corporativas
+            try {
+                doc.addImage(logoBase64, 'PNG', 12, 20, 38, 18);
+            } catch (e) {
+                // Fallback caso a imagem falhe por qualquer razão
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(18);
+                doc.setTextColor(217, 37, 37);
+                doc.text("ED7", 12, 28);
+                doc.setFontSize(8);
+                doc.setTextColor(0, 0, 0);
+                doc.text("PRAGAS", 12, 33);
+            }
 
-            // Dados de contato ao lado do logotipo
+            // Telefones
             doc.setFontSize(8);
             doc.setFont("helvetica", "bold");
-            doc.text("(85) 3223-5342", 110, 24);
+            doc.setTextColor(0, 0, 0);
+            doc.text("(85) 3223-5342", 115, 23);
             doc.setFont("helvetica", "normal");
-            doc.text("(85) 3243-7604  (85) 9.9220-714", 95, 28);
-            
-            // Coluna direita da empresa
+            doc.text("(85) 3243-7604  (85) 9.9220-7146", 100, 27);
+
+            // Bloco de Identificação Empresarial Direito
             doc.setFont("helvetica", "bold");
             doc.setFontSize(7);
-            doc.text("ED7 CONTROLES DE PRAGAS LTDA", 145, 22);
+            doc.text("ED7 CONTROLES DE PRAGAS LTDA", 143, 21);
             doc.setFont("helvetica", "normal");
-            doc.text("Rua Demóstenes de Carvalho 39 - Ellery", 145, 25);
-            doc.text("CNPJ: 28.493.166/0001-80", 145, 28);
+            doc.text("Rua: Demostenes de Carvalho 39 - Ellery", 143, 24);
+            doc.text("CNPJ: 26.493.166/0001-80", 143, 27);
+            
             doc.setTextColor(0, 0, 255);
-            doc.text("www.ed7controledepragas.com.br", 145, 31);
+            doc.text("extinsete.financiro@yahoo.com.br", 143, 30);
+            doc.text("www.ed7controledpragas.com.br", 143, 33);
+            
             doc.setTextColor(0, 0, 0);
-            doc.text("ALVARÁ DE VIGILÂNCIA VAL: 30/06/2026", 145, 34);
+            doc.setFont("helvetica", "bold");
+            doc.text("LICENÇA SANITÁRIA VAL: 05/01/2026", 143, 36);
+            doc.text("ALVARÁ DE FUNCIONAMENTO VAL: 30/06/2026", 143, 39);
+            doc.setFont("helvetica", "normal");
+            doc.text("CEATOX - CENTRO DE ASSIST TECNOLOGIA: 3223-5030", 143, 42);
 
             // Linha divisória
             doc.setDrawColor(0, 0, 0);
             doc.setLineWidth(0.4);
-            doc.line(10, 39, 200, 39);
+            doc.line(10, 45, 200, 45);
 
-            // 3. Dados do Cliente
+            // 3. Dados Cadastrais do Cliente
             doc.setFontSize(8);
             doc.setFont("helvetica", "bold");
-            doc.text("Cliente:", 12, 44);
+            doc.text("Cliente:", 12, 50);
             doc.setFont("helvetica", "normal");
-            doc.text("B&C LOGISTICA DE CARGAS E DESCARGAS LTDA", 25, 44);
+            doc.text("B&C LOGISTICA DE CARGAS E DESCARGAS LTDA", 25, 50);
 
             doc.setFont("helvetica", "bold");
-            doc.text("Endereço:", 12, 49);
+            doc.text("Endereço", 12, 55);
             doc.setFont("helvetica", "normal");
-            doc.text("RUA 01 Nº 575 CONJUNTO TABAPUA - CAUCAIA CE", 25, 49);
+            doc.text("RUA 01 Nº 575 CONJUNTO TABAPUA- CAUCAIA CE", 27, 55);
 
             doc.setFont("helvetica", "bold");
-            doc.text("CNPJ:", 12, 54);
+            doc.text("CNPJ:", 12, 60);
             doc.setFont("helvetica", "normal");
-            doc.text("17.718.101/0001-03", 22, 54);
-            doc.setFont("helvetica", "bold");
-            doc.text("Tel:", 90, 54);
-            doc.setFont("helvetica", "normal");
-            doc.text("00000000", 97, 54);
-
-            doc.setFont("helvetica", "bold");
-            doc.text("Serviços prestados:", 12, 59);
-            doc.setFont("helvetica", "bold");
-            doc.setTextColor(0, 0, 0);
-            doc.text("DEDETIZAÇÃO VEÍCULO PLACA", 42, 59);
+            doc.text("17.718.101/0001-03", 22, 60);
             
-            // Placa editável dinâmica
-            doc.setTextColor(217, 37, 37);
-            doc.setFontSize(9);
-            doc.text(placaVal, 95, 59);
-
-            doc.setTextColor(0, 0, 0);
-            doc.setFontSize(8);
             doc.setFont("helvetica", "bold");
-            doc.text("Data:", 115, 59);
+            doc.text("Tel:", 80, 60);
             doc.setFont("helvetica", "normal");
-            doc.text(dataVal, 124, 59);
+            doc.text("00000000", 87, 60);
+
+            // Serviços Prestados (com a Placa dinâmica e Data atualizável)
+            doc.setFont("helvetica", "bold");
+            doc.text("Serviços prestados:", 12, 65);
+            doc.setFont("helvetica", "normal");
+            doc.text("DEDETIZAÇÃO VEÍCULO PLACA", 41, 65);
+            
+            doc.setFont("helvetica", "bold");
+            doc.text(placaVal, 92, 65); // Placa inserida dinamicamente
+
+            doc.setFont("helvetica", "bold");
+            doc.text("Data:", 115, 65);
+            doc.setFont("helvetica", "normal");
+            doc.text(dataVal, 124, 65); // Data inserida dinamicamente
 
             // Prazo de assistência técnica
             doc.setFont("helvetica", "bold");
-            doc.text("Prazo de assistência técnica 30 dias.", 12, 65);
+            doc.text("Prazo de assistência técnica 30 dias.", 12, 71);
 
-            // 4. Tabela de Produtos Aplicados
+            // 4. Estrutura da Tabela de Produtos Aplicados
             const colunas = [
                 { name: "PRODUTO", x: 12 },
                 { name: "CONCENTRAÇÃO", x: 110 },
@@ -219,70 +221,70 @@
 
             // Cabeçalho da Tabela
             doc.setFillColor(245, 245, 245);
-            doc.rect(10, 68, 190, 6, "F");
+            doc.rect(10, 74, 190, 6, "F");
             doc.setDrawColor(0, 0, 0);
-            doc.setLineWidth(0.2);
-            doc.rect(10, 68, 190, 6);
+            doc.setLineWidth(0.25);
+            doc.rect(10, 74, 190, 6);
 
-            // Linhas internas verticais do cabeçalho
-            doc.line(108, 68, 108, 74);
-            doc.line(135, 68, 135, 74);
-            doc.line(165, 68, 165, 74);
+            // Divisórias verticais do Cabeçalho
+            doc.line(108, 74, 108, 80);
+            doc.line(135, 74, 135, 80);
+            doc.line(165, 74, 165, 80);
 
             doc.setFont("helvetica", "bold");
             doc.setFontSize(7.5);
             colunas.forEach(col => {
-                doc.text(col.name, col.x, 72);
+                doc.text(col.name, col.x, 78);
             });
 
-            // Dados da tabela (recriando o layout da imagem)
+            // Dados da tabela com base no documento físico fornecido
             const itens = [
                 { cat: "Descupinização", isHeader: true },
                 { prod: "Líquido (CUPINOL)", check: "( )", conc: "15%", active: "Bifentrina", ant: "Trat. Sintomático" },
-                { prod: "Líquido (TERMIDOR)", check: "( )", conc: "15%", active: "Fipronil - Pirazol", ant: "Trat. Sintomático" },
+                { prod: "Líquido (TERMIDOR)", check: "( )", conc: "15%", active: "Fenil- Pirazol", ant: "Trat. Sintomático" },
                 { prod: "Líquido (PREMISE SC 200)", check: "( )", conc: "20%", active: "Imidacloprid", ant: "Trat. Sintomático" },
                 { prod: "Pó", check: "( )", conc: "2%", active: "Amitraz", ant: "Sintomático" },
                 
                 { cat: "Granulados", isHeader: true },
-                { prod: "Granulados (Kael)", check: "( )", conc: "0,75%", active: "Brodifacoum", ant: "Vit. K1 Injetável" },
-                { prod: "Pó de Contato", check: "( )", conc: "0,05%", active: "Ciflutrina", ant: "Vit. K1 Injetável" },
-                { prod: "Peletizado (K-OTHRINE)", check: "( )", conc: "0,05%", active: "Flocoumafen", ant: "Vit. K1 Injetável" },
+                { prod: "Granulados (Kcael)", check: "( )", conc: "0,75%", active: "Brodifacoum", ant: "Vit. K1 Injetável" },
+                { prod: "Pó de Contato", check: "( )", conc: "0,05%", active: "Cifenetrin", ant: "Vit. K1 Injetável" },
+                { prod: "Peletizado (K-OBIOL)", check: "( )", conc: "0,05%", active: "Flocoumafen", ant: "Vit. K1 Injetável" },
                 
                 { cat: "Peletizado", isHeader: true },
                 { prod: "Líquido (ALFAROID 50SC)", check: "(X)", conc: "400%", active: "Alfacipermetrina", ant: "Vit. K1 Injetável" },
-                { prod: "Líquido (K-OTHRINE)", check: "( )", conc: "20%", active: "Deltametrina", ant: "Vit. K1 Injetável" },
-                { prod: "Líquido (DEMAND 2,5 CS)", check: "( )", conc: "2%", active: "Lambdacialotrina", ant: "Vit. K1 Injetável" },
-                { prod: "Gel", check: "( )", conc: "2%", active: "Imidacloprid", ant: "Vit. K1 Injetável" },
+                { prod: "Líquido (K-O THRIN)", check: "( )", conc: "20%", active: "Deltametrina", ant: "Vit. K1 Injetável" },
+                { prod: "Líquido (DEMAND 2,5 CS)", check: "( )", conc: "2%", active: "Lamddacialotrina", ant: "Vit. K1 injetável" },
+                { prod: "Gel", check: "( )", conc: "2%", active: "Lamddacialotrina", ant: "" },
                 { prod: "Gel", check: "(X)", conc: "1%", active: "Hidrametilona", ant: "Hidrametilona" }
             ];
 
-            let y = 74;
-            const rowHeight = 4.5;
+            let y = 80;
+            const rowHeight = 4.8;
 
             itens.forEach(item => {
                 if (item.isHeader) {
-                    // Sub-linha de Categoria
+                    // Linhas de agrupamento (ex: Descupinização)
                     doc.setFillColor(240, 240, 240);
                     doc.rect(10, y, 190, rowHeight, "F");
                     doc.rect(10, y, 190, rowHeight);
                     
                     doc.setFont("helvetica", "bold");
-                    doc.setFontSize(7);
-                    doc.text(item.cat, 15, y + 3.2);
+                    doc.setFontSize(7.5);
+                    doc.text(item.cat, 15, y + 3.4);
                 } else {
-                    // Linha comum de dados
+                    // Linhas convencionais de componentes químicos
                     doc.rect(10, y, 190, rowHeight);
                     doc.setFont("helvetica", "normal");
-                    doc.setFontSize(6.5);
+                    doc.setFontSize(7);
                     
-                    doc.text(item.prod, 12, y + 3.2);
-                    doc.text(item.check, 100, y + 3.2);
-                    doc.text(item.conc, 110, y + 3.2);
-                    doc.text(item.active, 138, y + 3.2);
-                    doc.text(item.ant, 168, y + 3.2);
+                    doc.text(item.prod, 12, y + 3.4);
+                    doc.text(item.check, 100, y + 3.4);
+                    doc.text(item.conc, 110, y + 3.4);
+                    doc.text(item.active, 138, y + 3.4);
+                    doc.text(item.ant, 168, y + 3.4);
                 }
                 
-                // Divisórias verticais da tabela
+                // Divisores verticais de colunas nas linhas
                 doc.line(108, y, 108, y + rowHeight);
                 doc.line(135, y, 135, y + rowHeight);
                 doc.line(165, y, 165, y + rowHeight);
@@ -290,31 +292,38 @@
                 y += rowHeight;
             });
 
-            // 5. Rodapé / Assinaturas
-            const signY = y + 10;
-            doc.setFontSize(7);
+            // 5. Assinaturas Finais e Responsabilidade Técnica
+            const baseSignY = y + 15;
+            doc.setFontSize(7.5);
+            
+            // Lado Esquerdo - Responsável Técnico
+            doc.line(15, baseSignY, 85, baseSignY);
             doc.setFont("helvetica", "normal");
-            doc.text("Técnico Resp.: Everaldo Farias Magalhães", 40, signY, { align: "center" });
-            doc.text("CRQ: 10101059 - 10ª Região", 40, signY + 3, { align: "center" });
+            doc.text("Técnica Resp.: Everaldo Farias Magalhães", 50, baseSignY + 4, { align: "center" });
+            doc.text("CRQ: 10101059 - 10ªRegião", 50, baseSignY + 7.5, { align: "center" });
 
-            doc.text("ED7 Controle de Pragas LTDA", 160, signY - 4, { align: "center" });
+            // Lado Direito - Representação e Diretoria
+            doc.line(125, baseSignY, 195, baseSignY);
+            doc.setFont("helvetica", "normal");
+            doc.text("ED7 Controle de Pragas LTDA", 160, baseSignY + 4, { align: "center" });
+            
             doc.setFont("helvetica", "bold");
             doc.setTextColor(0, 0, 255);
-            doc.text("Thamara Maciel", 160, signY, { align: "center" });
+            doc.text("Thamara Maciel", 160, baseSignY + 8, { align: "center" });
+            
             doc.setFont("helvetica", "normal");
             doc.setTextColor(0, 0, 0);
-            doc.text("Thamara Maciel Pompeu", 160, signY + 3, { align: "center" });
-            doc.text("Diretora", 160, signY + 6, { align: "center" });
+            doc.text("Thamara Maciel Pompeu", 160, baseSignY + 11.5, { align: "center" });
+            doc.text("Diretora", 160, baseSignY + 15, { align: "center" });
 
             return doc;
         }
 
-        // Funções dos Botões
+        // Funções de Operação e Disparo
         function gerarPDF() {
             const doc = buildPDF();
             const pdfBlobUrl = doc.output('bloburl');
             
-            // Atualiza os frames do visualizador na tela
             document.getElementById('pdf-preview-main').src = pdfBlobUrl;
             document.getElementById('pdf-preview-thumb').src = pdfBlobUrl;
         }
@@ -335,7 +344,7 @@
             doc.save(`certificado-${placaVal}.pdf`);
         }
 
-        // Gera o PDF inicial ao carregar a página
+        // Carrega e renderiza o PDF automaticamente com a tela inicial
         window.onload = function() {
             gerarPDF();
         };
