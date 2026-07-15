@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Certificado - ED7 Pragas</title>
+    <!-- Tailwind CSS para estilização rápida e moderna -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome para os ícones dos botões -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- jsPDF para geração do PDF no lado do cliente -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body {
+            background-color: #f3f4f6;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 flex justify-center items-start min-h-screen">
+
+    <div class="bg-white rounded-xl shadow-lg p-6 max-w-5xl w-full border border-gray-100">
+        
+        <!-- Formulário de Entrada -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div>
+                <label class="block text-gray-700 font-bold tracking-wider mb-2 text-sm uppercase">Placa do Veículo</label>
+                <input type="text" id="placa" value="POF5737" 
+                    class="w-full bg-[#eef4ff] text-[#0d1b2a] font-bold text-center py-4 px-3 rounded-xl border border-gray-200 text-xl tracking-widest focus:outline-none focus:ring-2 focus:ring-blue-500 uppercase">
+            </div>
+            <div>
+                <label class="block text-gray-700 font-bold tracking-wider mb-2 text-sm uppercase">Data do Certificado</label>
+                <input type="date" id="dataCertificado" value="2026-07-15"
+                    class="w-full bg-white text-[#0d1b2a] font-semibold py-4 px-4 rounded-xl border border-gray-300 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+        </div>
+
+        <!-- Botões de Ação -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <button onclick="gerarPDF()" class="bg-[#d92525] hover:bg-[#b01e1e] text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition duration-200 shadow-md">
+                <i class="fa-solid fa-file-invoice"></i> Gerar
+            </button>
+            <button onclick="visualizarPDF()" class="bg-white hover:bg-gray-50 text-gray-800 font-semibold py-3 px-4 rounded-xl border border-gray-300 flex items-center justify-center gap-2 transition duration-200 shadow-sm">
+                <i class="fa-regular fa-eye"></i> Visualizar
+            </button>
+            <button onclick="imprimirPDF()" class="bg-white hover:bg-gray-50 text-gray-800 font-semibold py-3 px-4 rounded-xl border border-gray-300 flex items-center justify-center gap-2 transition duration-200 shadow-sm">
+                <i class="fa-solid fa-print"></i> Imprimir
+            </button>
+            <button onclick="baixarPDF()" class="bg-white hover:bg-gray-50 text-gray-800 font-semibold py-3 px-4 rounded-xl border border-gray-300 flex items-center justify-center gap-2 transition duration-200 shadow-sm">
+                <i class="fa-solid fa-download"></i> Baixar PDF
+            </button>
+        </div>
+
+        <!-- Área do Visualizador do PDF (Simulando o visualizador do Chrome/Edge da imagem) -->
+        <div class="border border-gray-300 rounded-lg overflow-hidden bg-[#323639] flex flex-col h-[700px]">
+            <!-- Barra de ferramentas do leitor de PDF -->
+            <div class="bg-[#2f3134] text-white px-4 py-3 flex items-center justify-between border-b border-gray-800 text-sm">
+                <div class="flex items-center gap-4">
+                    <button class="hover:bg-gray-700 p-1 rounded"><i class="fa-solid fa-bars"></i></button>
+                    <span class="font-medium text-gray-300 text-xs truncate max-w-[120px]" id="pdf-title">certificado.pdf</span>
+                    <div class="bg-[#202124] px-2 py-1 rounded text-xs flex items-center gap-1">
+                        <span id="page-num">1</span> / <span id="page-count">1</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button class="hover:bg-gray-700 p-1.5 rounded text-xs"><i class="fa-solid fa-minus"></i></button>
+                    <span class="text-xs">47%</span>
+                    <button class="hover:bg-gray-700 p-1.5 rounded text-xs"><i class="fa-solid fa-plus"></i></button>
+                    <span class="h-4 w-px bg-gray-600"></span>
+                    <button class="hover:bg-gray-700 p-1.5 rounded text-xs"><i class="fa-solid fa-rotate-right"></i></button>
+                    <button class="hover:bg-gray-700 p-1.5 rounded text-xs"><i class="fa-solid fa-pen-nib"></i></button>
+                    <button class="hover:bg-gray-700 p-1.5 rounded text-xs"><i class="fa-solid fa-download"></i></button>
+                    <button class="hover:bg-gray-700 p-1.5 rounded text-xs"><i class="fa-solid fa-print"></i></button>
+                </div>
+            </div>
+
+            <!-- Corpo do Visualizador com Miniatura e Visualização Principal -->
+            <div class="flex flex-1 overflow-hidden">
+                <!-- Miniatura Lateral -->
+                <div class="w-1/4 bg-[#202124] border-r border-gray-800 p-4 hidden sm:flex flex-col items-center overflow-y-auto">
+                    <div class="border-2 border-blue-500 p-1 bg-white cursor-pointer shadow-lg hover:brightness-95 transition">
+                        <iframe id="pdf-preview-thumb" class="w-24 h-32 pointer-events-none" src=""></iframe>
+                    </div>
+                    <span class="text-xs text-gray-400 mt-2">1</span>
+                </div>
+                <!-- Visualizador Principal -->
+                <div class="flex-1 bg-[#525659] p-4 overflow-auto flex justify-center items-start">
+                    <iframe id="pdf-preview-main" class="w-full h-full max-w-3xl bg-white shadow-2xl rounded" src=""></iframe>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Script de Geração e Interação do PDF -->
+    <script>
+        const { jsPDF } = window.jspdf;
+
+        // Função para formatar data de YYYY-MM-DD para DD/MM/YYYY
+        function formatarData(dataStr) {
+            if (!dataStr) return "";
+            const partes = dataStr.split('-');
+            return `${partes[2]}/${partes[1]}/${partes[0]}`;
+        }
+
+        // Função principal de desenho do PDF
+        function buildPDF() {
+            const doc = new jsPDF({
+                orientation: "portrait",
+                unit: "mm",
+                format: "a4"
+            });
+
+            const placaVal = document.getElementById('placa').value.toUpperCase() || "POF5737";
+            const dataVal = formatarData(document.getElementById('dataCertificado').value) || "15/07/2026";
+
+            // 1. Cabeçalho Principal Vermelho
+            doc.setFillColor(217, 37, 37); // Vermelho
+            doc.rect(10, 10, 190, 8, "F");
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(10);
+            doc.setTextColor(255, 255, 255);
+            doc.text("Imunização e Controle de Pragas Urbanas", 12, 15.5);
+            doc.text("CERTIFICADO DE GARANTIA", 148, 15.5);
+
+            // 2. Logotipo e Dados da Empresa
+            // Desenho do Sapinho / Logotipo ED7 de forma representativa (Formas coloridas para manter o código puro sem arquivos externos)
+            doc.setFillColor(51, 160, 44); // Verde do sapinho
+            doc.ellipse(22, 30, 8, 6, "F");
+            doc.setFillColor(255, 255, 255);
+            doc.ellipse(19, 26, 2.5, 2.5, "F");
+            doc.ellipse(25, 26, 2.5, 2.5, "F");
+            doc.setFillColor(0, 0, 0);
+            doc.ellipse(19, 26, 1, 1, "F");
+            doc.ellipse(25, 26, 1, 1, "F");
+            // Texto do Logo "ED7 PRAGAS"
+            doc.setFontSize(22);
+            doc.setFont("helvetica", "bold");
+            doc.setTextColor(217, 37, 37);
+            doc.text("ED7", 32, 31);
+            doc.setFontSize(10);
+            doc.setTextColor(0, 0, 0);
+            doc.text("PRAGAS", 32, 35);
+
+            // Dados de contato ao lado do logotipo
+            doc.setFontSize(8);
+            doc.setFont("helvetica", "bold");
+            doc.text("(85) 3223-5342", 110, 24);
+            doc.setFont("helvetica", "normal");
+            doc.text("(85) 3243-7604  (85) 9.9220-714", 95, 28);
+            
+            // Coluna direita da empresa
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(7);
+            doc.text("ED7 CONTROLES DE PRAGAS LTDA", 145, 22);
+            doc.setFont("helvetica", "normal");
+            doc.text("Rua Demóstenes de Carvalho 39 - Ellery", 145, 25);
+            doc.text("CNPJ: 28.493.166/0001-80", 145, 28);
+            doc.setTextColor(0, 0, 255);
+            doc.text("www.ed7controledepragas.com.br", 145, 31);
+            doc.setTextColor(0, 0, 0);
+            doc.text("ALVARÁ DE VIGILÂNCIA VAL: 30/06/2026", 145, 34);
+
+            // Linha divisória
+            doc.setDrawColor(0, 0, 0);
+            doc.setLineWidth(0.4);
+            doc.line(10, 39, 200, 39);
+
+            // 3. Dados do Cliente
+            doc.setFontSize(8);
+            doc.setFont("helvetica", "bold");
+            doc.text("Cliente:", 12, 44);
+            doc.setFont("helvetica", "normal");
+            doc.text("B&C LOGISTICA DE CARGAS E DESCARGAS LTDA", 25, 44);
+
+            doc.setFont("helvetica", "bold");
+            doc.text("Endereço:", 12, 49);
+            doc.setFont("helvetica", "normal");
+            doc.text("RUA 01 Nº 575 CONJUNTO TABAPUA - CAUCAIA CE", 25, 49);
+
+            doc.setFont("helvetica", "bold");
+            doc.text("CNPJ:", 12, 54);
+            doc.setFont("helvetica", "normal");
+            doc.text("17.718.101/0001-03", 22, 54);
+            doc.setFont("helvetica", "bold");
+            doc.text("Tel:", 90, 54);
+            doc.setFont("helvetica", "normal");
+            doc.text("00000000", 97, 54);
+
+            doc.setFont("helvetica", "bold");
+            doc.text("Serviços prestados:", 12, 59);
+            doc.setFont("helvetica", "bold");
+            doc.setTextColor(0, 0, 0);
+            doc.text("DEDETIZAÇÃO VEÍCULO PLACA", 42, 59);
+            
+            // Placa editável dinâmica
+            doc.setTextColor(217, 37, 37);
+            doc.setFontSize(9);
+            doc.text(placaVal, 95, 59);
+
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(8);
+            doc.setFont("helvetica", "bold");
+            doc.text("Data:", 115, 59);
+            doc.setFont("helvetica", "normal");
+            doc.text(dataVal, 124, 59);
+
+            // Prazo de assistência técnica
+            doc.setFont("helvetica", "bold");
+            doc.text("Prazo de assistência técnica 30 dias.", 12, 65);
+
+            // 4. Tabela de Produtos Aplicados
+            const colunas = [
+                { name: "PRODUTO", x: 12 },
+                { name: "CONCENTRAÇÃO", x: 110 },
+                { name: "PRINC. ATIVO", x: 138 },
+                { name: "ANTÍDOTO", x: 168 }
+            ];
+
+            // Cabeçalho da Tabela
+            doc.setFillColor(245, 245, 245);
+            doc.rect(10, 68, 190, 6, "F");
+            doc.setDrawColor(0, 0, 0);
+            doc.setLineWidth(0.2);
+            doc.rect(10, 68, 190, 6);
+
+            // Linhas internas verticais do cabeçalho
+            doc.line(108, 68, 108, 74);
+            doc.line(135, 68, 135, 74);
+            doc.line(165, 68, 165, 74);
+
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(7.5);
+            colunas.forEach(col => {
+                doc.text(col.name, col.x, 72);
+            });
+
+            // Dados da tabela (recriando o layout da imagem)
+            const itens = [
+                { cat: "Descupinização", isHeader: true },
+                { prod: "Líquido (CUPINOL)", check: "( )", conc: "15%", active: "Bifentrina", ant: "Trat. Sintomático" },
+                { prod: "Líquido (TERMIDOR)", check: "( )", conc: "15%", active: "Fipronil - Pirazol", ant: "Trat. Sintomático" },
+                { prod: "Líquido (PREMISE SC 200)", check: "( )", conc: "20%", active: "Imidacloprid", ant: "Trat. Sintomático" },
+                { prod: "Pó", check: "( )", conc: "2%", active: "Amitraz", ant: "Sintomático" },
+                
+                { cat: "Granulados", isHeader: true },
+                { prod: "Granulados (Kael)", check: "( )", conc: "0,75%", active: "Brodifacoum", ant: "Vit. K1 Injetável" },
+                { prod: "Pó de Contato", check: "( )", conc: "0,05%", active: "Ciflutrina", ant: "Vit. K1 Injetável" },
+                { prod: "Peletizado (K-OTHRINE)", check: "( )", conc: "0,05%", active: "Flocoumafen", ant: "Vit. K1 Injetável" },
+                
+                { cat: "Peletizado", isHeader: true },
+                { prod: "Líquido (ALFAROID 50SC)", check: "(X)", conc: "400%", active: "Alfacipermetrina", ant: "Vit. K1 Injetável" },
+                { prod: "Líquido (K-OTHRINE)", check: "( )", conc: "20%", active: "Deltametrina", ant: "Vit. K1 Injetável" },
+                { prod: "Líquido (DEMAND 2,5 CS)", check: "( )", conc: "2%", active: "Lambdacialotrina", ant: "Vit. K1 Injetável" },
+                { prod: "Gel", check: "( )", conc: "2%", active: "Imidacloprid", ant: "Vit. K1 Injetável" },
+                { prod: "Gel", check: "(X)", conc: "1%", active: "Hidrametilona", ant: "Hidrametilona" }
+            ];
+
+            let y = 74;
+            const rowHeight = 4.5;
+
+            itens.forEach(item => {
+                if (item.isHeader) {
+                    // Sub-linha de Categoria
+                    doc.setFillColor(240, 240, 240);
+                    doc.rect(10, y, 190, rowHeight, "F");
+                    doc.rect(10, y, 190, rowHeight);
+                    
+                    doc.setFont("helvetica", "bold");
+                    doc.setFontSize(7);
+                    doc.text(item.cat, 15, y + 3.2);
+                } else {
+                    // Linha comum de dados
+                    doc.rect(10, y, 190, rowHeight);
+                    doc.setFont("helvetica", "normal");
+                    doc.setFontSize(6.5);
+                    
+                    doc.text(item.prod, 12, y + 3.2);
+                    doc.text(item.check, 100, y + 3.2);
+                    doc.text(item.conc, 110, y + 3.2);
+                    doc.text(item.active, 138, y + 3.2);
+                    doc.text(item.ant, 168, y + 3.2);
+                }
+                
+                // Divisórias verticais da tabela
+                doc.line(108, y, 108, y + rowHeight);
+                doc.line(135, y, 135, y + rowHeight);
+                doc.line(165, y, 165, y + rowHeight);
+
+                y += rowHeight;
+            });
+
+            // 5. Rodapé / Assinaturas
+            const signY = y + 10;
+            doc.setFontSize(7);
+            doc.setFont("helvetica", "normal");
+            doc.text("Técnico Resp.: Everaldo Farias Magalhães", 40, signY, { align: "center" });
+            doc.text("CRQ: 10101059 - 10ª Região", 40, signY + 3, { align: "center" });
+
+            doc.text("ED7 Controle de Pragas LTDA", 160, signY - 4, { align: "center" });
+            doc.setFont("helvetica", "bold");
+            doc.setTextColor(0, 0, 255);
+            doc.text("Thamara Maciel", 160, signY, { align: "center" });
+            doc.setFont("helvetica", "normal");
+            doc.setTextColor(0, 0, 0);
+            doc.text("Thamara Maciel Pompeu", 160, signY + 3, { align: "center" });
+            doc.text("Diretora", 160, signY + 6, { align: "center" });
+
+            return doc;
+        }
+
+        // Funções dos Botões
+        function gerarPDF() {
+            const doc = buildPDF();
+            const pdfBlobUrl = doc.output('bloburl');
+            
+            // Atualiza os frames do visualizador na tela
+            document.getElementById('pdf-preview-main').src = pdfBlobUrl;
+            document.getElementById('pdf-preview-thumb').src = pdfBlobUrl;
+        }
+
+        function visualizarPDF() {
+            gerarPDF();
+        }
+
+        function imprimirPDF() {
+            const doc = buildPDF();
+            doc.autoPrint();
+            window.open(doc.output('bloburl'), '_blank');
+        }
+
+        function baixarPDF() {
+            const doc = buildPDF();
+            const placaVal = document.getElementById('placa').value.toUpperCase() || "VEICULO";
+            doc.save(`certificado-${placaVal}.pdf`);
+        }
+
+        // Gera o PDF inicial ao carregar a página
+        window.onload = function() {
+            gerarPDF();
+        };
+    </script>
+</body>
+</html>
